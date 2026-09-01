@@ -23,7 +23,7 @@ const props = defineProps<{
 <template>
     <Head title="Tasks" />
 
-    <ul class="flex flex-col gap-1 p-4 w-[720px]">
+    <ul class="flex flex-col gap-4 p-4 w-[720px]">
         <li v-for="task in props.tasks" :key="task.id">
             <Task :task-data="task" />
         </li>
