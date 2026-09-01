@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Clock } from '@lucide/vue';
 import { formatTimeAgoIntl } from '@vueuse/core';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { taskService } from '@/services/taskService.js';
 import TextBadge from '../ui/text-badge/TextBadge.vue';
 import TaskCheckbox from './TaskCheckbox.vue';
 import type { ITask } from '.';
@@ -57,13 +58,37 @@ const deadlineFormatted = computed(() => {
         return `${timestampIntl} (${countdownIntl})`;
     }
 });
+
+const isCompleted = ref(Boolean(props.taskData.completed_at));
+const isUpdating = ref(false);
+
+async function handleComplete() {
+    if (isCompleted.value || isUpdating.value) {
+        return;
+    }
+
+    isUpdating.value = true;
+    isCompleted.value = true;
+
+    try {
+        await taskService.complete(props.taskData.id);
+    } catch (error) {
+        isCompleted.value = false;
+        console.error('Failed to complete task:', error);
+    } finally {
+        isUpdating.value = false;
+    }
+}
 </script>
 
 <template>
     <div
         class="flex items-start gap-3.5 bg-white shadow-sm p-4 border border-slate-200/80 hover:border-slate-300 rounded-xl transition-colors"
     >
-        <TaskCheckbox />
+        <TaskCheckbox
+            @click="handleComplete"
+            :disabled="isUpdating || isCompleted"
+        />
 
         <div class="flex flex-col gap-1">
             <h4 class="font-semibold text-slate-900 text-sm leading-tight">

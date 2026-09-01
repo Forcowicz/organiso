@@ -14,7 +14,7 @@ class TaskController extends Controller
      */
     public function index()
     {
-        $tasks = Task::with('user')->where('user_id', Auth::user()->id)->get();
+        $tasks = Task::with('user')->where('user_id', Auth::user()->id)->where('completed_at', null)->orderBy('due_date', 'asc')->get();
 
         return Inertia::render('Tasks', [
             'tasks' => $tasks
@@ -46,19 +46,17 @@ class TaskController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Task $task)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, Task $task)
     {
-        //
+        $task->completed_at = $request->completed_at;
+        $task->save();
+
+        return response()->json([
+            'status' => 'success',
+            'task' => $task
+        ]);
     }
 
     /**

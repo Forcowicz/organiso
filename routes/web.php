@@ -11,6 +11,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::controller(TaskController::class)->group(function () {
     Route::get('/tasks', 'index')->name('tasks.index');
+    Route::patch('/tasks/{task}', 'update')->name('tasks.update');
 })->middleware(['auth', 'verified']);
 
 require __DIR__ . '/settings.php';
