@@ -30,9 +30,11 @@ class StoreTaskRequest extends FormRequest
             'is_important' => ['boolean', 'required'],
             'due_date' => [
                 Rule::date()->format('Y-m-d'),
+                'nullable'
             ],
             'due_time' => [
                 'exclude_without:due_date',
+                'nullable',
                 Rule::date()->format('H:i')
             ]
         ];
