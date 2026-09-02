@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type { TaskPayload } from '@/composables/useTaskForm';
 import tasks from '@/routes/tasks';
 
 export const taskService = {
@@ -7,6 +8,12 @@ export const taskService = {
             completed_at: new Date().toISOString(),
         });
 
-        return res;
+        return res.data;
+    },
+
+    async store(payload: TaskPayload) {
+        const res = await axios.post(tasks.store().url, payload);
+
+        return res.data;
     },
 };

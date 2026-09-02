@@ -2,9 +2,11 @@
 import { Head } from '@inertiajs/vue3';
 import type { ITask } from '@/components/Task';
 import Task from '@/components/Task/Task.vue';
+import { useTaskForm } from '@/composables/useTaskForm';
 import taskRoutes from '@/routes/tasks';
-import { ref } from 'vue';
 import { taskService } from '@/services/taskService';
+import { useModalStore } from '@/stores/modalStore';
+import { useTaskStore } from '@/stores/taskStore';
 
 defineOptions({
     layout: {
@@ -21,28 +23,14 @@ const props = defineProps<{
     tasks: ITask[];
 }>();
 
-const localTasks = ref([...props.tasks]);
-const updatingTaskIds = ref(new Set());
+const taskStore = useTaskStore();
+taskStore.setTasks(props.tasks);
 
-async function handleComplete(id: string) {
-    if (updatingTaskIds.value.has(id)) {
-        return;
-    }
+const taskForm = useTaskForm({
+    submitter: taskService.store,
+});
 
-    updatingTaskIds.value.add(id);
-
-    try {
-        await taskService.complete(id);
-
-        setTimeout(() => {
-            localTasks.value = localTasks.value.filter((t) => t.id !== id);
-        }, 1000);
-    } catch (error) {
-        console.error('Failed to complete task:', error);
-    } finally {
-        updatingTaskIds.value.delete(id);
-    }
-}
+const modalStore = useModalStore();
 </script>
 
 <template>
@@ -53,11 +41,14 @@ async function handleComplete(id: string) {
         tag="ul"
         class="flex flex-col gap-4 p-4 md:w-[720px]"
     >
-        <li v-for="task in localTasks" :key="task.id">
+        <li v-for="task in taskStore.tasks" :key="task.id">
             <Task
                 :task-data="task"
-                :is-updating="updatingTaskIds.has(task.id)"
-                @completed="handleComplete"
+                :is-updating="taskStore.updatingTaskIds.has(task.id)"
+                @completed="taskStore.completeTask"
+                @click="
+                    modalStore.open({ id: 'store-task', form: taskForm.form })
+                "
             />
         </li>
     </TransitionGroup>
@@ -66,7 +57,7 @@ async function handleComplete(id: string) {
 <style scoped>
 @reference "../../css/app.css";
 
-.list-move, /* apply transition to moving elements */
+.list-move,
 .list-enter-active,
 .list-leave-active {
     @apply transition-all;
@@ -77,8 +68,6 @@ async function handleComplete(id: string) {
     @apply opacity-0;
 }
 
-/* ensure leaving items are taken out of layout flow so that moving
-   animations can be calculated correctly. */
 .list-leave-active {
     @apply -z-10 absolute;
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTaskRequest;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,19 +23,26 @@ class TaskController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreTaskRequest $request)
     {
-        //
+        $validated = $request->validated();
+
+        $task = new Task();
+        $task->name = $validated['name'];
+        $task->description = $validated['description'];
+        $task->is_urgent = $validated['is_urgent'];
+        $task->is_important = $validated['is_important'];
+        $task->due_date = $validated['due_date'];
+        $task->due_time = $validated['due_time'];
+        $task->user_id = $request->user()->id;
+        $task->save();
+
+        return response()->json([
+            'status' => 'success',
+            'task' => $task
+        ], 201);
     }
 
     /**
