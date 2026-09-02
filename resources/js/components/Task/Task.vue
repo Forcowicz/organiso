@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Clock } from '@lucide/vue';
-import { formatTimeAgoIntl } from '@vueuse/core';
+import { useDateFormat, useTimeAgoIntl } from '@vueuse/core';
 import { computed, ref } from 'vue';
 import { taskService } from '@/services/taskService.js';
 import TextBadge from '../ui/text-badge/TextBadge.vue';
@@ -11,52 +11,31 @@ const props = defineProps<{
     taskData: ITask;
 }>();
 
-const deadlineFormatted = computed(() => {
+const dueDate = computed(() => {
     if (!props.taskData.due_date) {
         return null;
     }
 
-    if (props.taskData.due_time) {
-        const date = new Date(
-            `${props.taskData.due_date}T${props.taskData.due_time}`,
-        );
+    return props.taskData.due_time
+        ? new Date(`${props.taskData.due_date}T${props.taskData.due_time}`)
+        : new Date(props.taskData.due_date);
+});
 
-        const timestampIntl = new Intl.DateTimeFormat('pl-PL', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-        }).format(date);
+const dateFormatPattern = computed(() =>
+    props.taskData.due_time ? 'D MMM YYYY, HH:mm' : 'D MMM YYYY',
+);
 
-        const countdownIntl = formatTimeAgoIntl(date);
+const timestamp = useDateFormat(dueDate, dateFormatPattern, {
+    locales: 'pl-PL',
+});
+const countdown = useTimeAgoIntl(dueDate);
 
-        return `${timestampIntl} (${countdownIntl})`;
-    } else {
-        const date = new Date(props.taskData.due_date);
-
-        const timestampIntl = new Intl.DateTimeFormat('pl-PL', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-        }).format(date);
-
-        const DAY_MS = 1000 * 60 * 60 * 24;
-        const countdownIntl = formatTimeAgoIntl(date, {
-            locale: 'pl-PL',
-            units: [
-                { name: 'year', ms: DAY_MS * 365 },
-                { name: 'month', ms: DAY_MS * 30 },
-                { name: 'week', ms: DAY_MS * 7 },
-                { name: 'day', ms: DAY_MS },
-            ],
-            relativeTimeFormatOptions: {
-                numeric: 'auto',
-            },
-        });
-
-        return `${timestampIntl} (${countdownIntl})`;
+const deadlineFormatted = computed(() => {
+    if (!dueDate.value) {
+        return null;
     }
+
+    return `${timestamp.value} (${countdown.value})`;
 });
 
 const isCompleted = ref(Boolean(props.taskData.completed_at));
@@ -94,6 +73,7 @@ async function handleComplete() {
             <h4 class="font-semibold text-slate-900 text-sm leading-tight">
                 {{ props.taskData.name }}
             </h4>
+
             <p
                 v-if="props.taskData.description"
                 class="text-slate-500 text-xs leading-relaxed"
