@@ -29,7 +29,17 @@ const timestamp = useDateFormat(dueDate, dateFormatPattern, {
     locales: 'pl-PL',
 });
 
-const countdown = useTimeAgoIntl(dueDate);
+const countdownOptions = props.taskData.due_time
+    ? {}
+    : {
+          units: [
+              { max: Infinity, value: 31_536_000_000, name: 'year' },
+              { max: 31_536_000_000, value: 2_592_000_000, name: 'month' },
+              { max: 2_592_000_000, value: 604_800_000, name: 'week' },
+              { max: 604_800_000, value: 86_400_000, name: 'day' },
+          ],
+      };
+const countdown = useTimeAgoIntl(dueDate, countdownOptions);
 
 const deadlineFormatted = computed(() => {
     if (!dueDate.value) {
