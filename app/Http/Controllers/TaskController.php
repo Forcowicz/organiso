@@ -31,11 +31,11 @@ class TaskController extends Controller
 
         $task = new Task();
         $task->name = $validated['name'];
-        $task->description = $validated['description'];
+        $task->description = $validated['description'] ?? null;
         $task->is_urgent = $validated['is_urgent'];
         $task->is_important = $validated['is_important'];
-        $task->due_date = $validated['due_date'];
-        $task->due_time = $validated['due_time'];
+        $task->due_date = $validated['due_date'] ?? null;
+        $task->due_time = $validated['due_time'] ?? null;
         $task->user_id = $request->user()->id;
         $task->save();
 
