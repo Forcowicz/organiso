@@ -25,7 +25,7 @@ class StoreTaskRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:256'],
-            'description' => ['string'],
+            'description' => ['string', 'nullable'],
             'is_urgent' => ['boolean', 'required'],
             'is_important' => ['boolean', 'required'],
             'due_date' => [
