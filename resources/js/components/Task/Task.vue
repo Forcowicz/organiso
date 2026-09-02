@@ -2,13 +2,13 @@
 import { Clock } from '@lucide/vue';
 import { useDateFormat, useTimeAgoIntl } from '@vueuse/core';
 import { computed, ref } from 'vue';
-import { taskService } from '@/services/taskService.js';
 import TextBadge from '../ui/text-badge/TextBadge.vue';
 import TaskCheckbox from './TaskCheckbox.vue';
 import type { ITask } from '.';
 
 const props = defineProps<{
     taskData: ITask;
+    isUpdating: boolean;
 }>();
 
 const dueDate = computed(() => {
@@ -28,6 +28,7 @@ const dateFormatPattern = computed(() =>
 const timestamp = useDateFormat(dueDate, dateFormatPattern, {
     locales: 'pl-PL',
 });
+
 const countdown = useTimeAgoIntl(dueDate);
 
 const deadlineFormatted = computed(() => {
@@ -38,26 +39,9 @@ const deadlineFormatted = computed(() => {
     return `${timestamp.value} (${countdown.value})`;
 });
 
-const isCompleted = ref(Boolean(props.taskData.completed_at));
-const isUpdating = ref(false);
-
-async function handleComplete() {
-    if (isCompleted.value || isUpdating.value) {
-        return;
-    }
-
-    isUpdating.value = true;
-    isCompleted.value = true;
-
-    try {
-        await taskService.complete(props.taskData.id);
-    } catch (error) {
-        isCompleted.value = false;
-        console.error('Failed to complete task:', error);
-    } finally {
-        isUpdating.value = false;
-    }
-}
+const emits = defineEmits<{
+    completed: [id: string];
+}>();
 </script>
 
 <template>
@@ -65,8 +49,8 @@ async function handleComplete() {
         class="flex items-start gap-3.5 bg-white shadow-sm p-4 border border-slate-200/80 hover:border-slate-300 rounded-xl transition-colors"
     >
         <TaskCheckbox
-            @click="handleComplete"
-            :disabled="isUpdating || isCompleted"
+            @click="emits('completed', props.taskData.id)"
+            :disabled="props.isUpdating"
         />
 
         <div class="flex flex-col gap-1">
