@@ -9,7 +9,7 @@ const props = withDefaults(
         content: string;
     }>(),
     {
-        class: 'text-slate-500',
+        class: 'text-slate-500 dark:text-slate-400',
     },
 );
 </script>

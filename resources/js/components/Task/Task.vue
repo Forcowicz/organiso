@@ -56,7 +56,7 @@ const emits = defineEmits<{
 
 <template>
     <div
-        class="flex items-start gap-3.5 rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm transition-colors hover:border-slate-300"
+        class="flex items-start gap-3.5 rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm transition-colors hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
     >
         <TaskCheckbox
             @click="emits('completed', props.taskData.id)"
@@ -64,13 +64,15 @@ const emits = defineEmits<{
         />
 
         <div class="flex flex-col gap-1">
-            <h4 class="text-sm leading-tight font-semibold text-slate-900">
+            <h4
+                class="text-sm leading-tight font-semibold text-slate-900 dark:text-slate-100"
+            >
                 {{ props.taskData.name }}
             </h4>
 
             <p
                 v-if="props.taskData.description"
-                class="text-xs leading-relaxed text-slate-500"
+                class="text-xs leading-relaxed text-slate-500 dark:text-slate-400"
             >
                 {{ props.taskData.description }}
             </p>
@@ -79,6 +81,7 @@ const emits = defineEmits<{
                 v-if="deadlineFormatted"
                 :icon="Clock"
                 :content="deadlineFormatted"
+                class="text-slate-500 dark:text-slate-400"
             />
         </div>
     </div>
