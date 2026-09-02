@@ -1,9 +1,8 @@
 import { defineStore } from 'pinia';
 import type { Ref } from 'vue';
 import { ref } from 'vue';
-import type { TaskForm } from '@/composables/useTaskForm';
 
-export type Modal = { id: 'store-task'; form: TaskForm };
+export type Modal = { id: 'store-task' };
 
 export const useModalStore = defineStore('modal', () => {
     const isOpen = ref(false);

@@ -2,6 +2,7 @@
 import { Head } from '@inertiajs/vue3';
 import type { ITask } from '@/components/Task';
 import Task from '@/components/Task/Task.vue';
+import Button from '@/components/ui/button/Button.vue';
 import { useTaskForm } from '@/composables/useTaskForm';
 import taskRoutes from '@/routes/tasks';
 import { taskService } from '@/services/taskService';
@@ -36,22 +37,24 @@ const modalStore = useModalStore();
 <template>
     <Head title="Tasks" />
 
-    <TransitionGroup
-        name="list"
-        tag="ul"
-        class="flex flex-col gap-4 p-4 md:w-[720px]"
-    >
-        <li v-for="task in taskStore.tasks" :key="task.id">
-            <Task
-                :task-data="task"
-                :is-updating="taskStore.updatingTaskIds.has(task.id)"
-                @completed="taskStore.completeTask"
-                @click="
-                    modalStore.open({ id: 'store-task', form: taskForm.form })
-                "
-            />
-        </li>
-    </TransitionGroup>
+    <div class="p-4">
+        <Button class="w-max" @click="modalStore.open({ id: 'store-task' })"
+            >New task</Button
+        >
+        <TransitionGroup
+            name="list"
+            tag="ul"
+            class="flex flex-col gap-4 mt-6 md:w-[720px]"
+        >
+            <li v-for="task in taskStore.tasks" :key="task.id">
+                <Task
+                    :task-data="task"
+                    :is-updating="taskStore.updatingTaskIds.has(task.id)"
+                    @completed="taskStore.completeTask"
+                />
+            </li>
+        </TransitionGroup>
+    </div>
 </template>
 
 <style scoped>
