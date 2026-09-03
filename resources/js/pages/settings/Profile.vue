@@ -44,11 +44,22 @@ const user = computed(() => page.props.auth.user);
             class="space-y-6"
             v-slot="{ errors, processing }"
         >
-            <div class="grid gap-2">
+            <div class="gap-2 grid">
+                <Label for="profile_picture">Profile picture</Label>
+                <Input
+                    id="profile_picture"
+                    class="block mt-1 w-full"
+                    name="profile_picture"
+                    type="file"
+                />
+                <InputError class="mt-2" :message="errors.profile_picture" />
+            </div>
+
+            <div class="gap-2 grid">
                 <Label for="name">Name</Label>
                 <Input
                     id="name"
-                    class="mt-1 block w-full"
+                    class="block mt-1 w-full"
                     name="name"
                     :default-value="user.name"
                     required
@@ -58,12 +69,12 @@ const user = computed(() => page.props.auth.user);
                 <InputError class="mt-2" :message="errors.name" />
             </div>
 
-            <div class="grid gap-2">
+            <div class="gap-2 grid">
                 <Label for="email">Email address</Label>
                 <Input
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="block mt-1 w-full"
                     name="email"
                     :default-value="user.email"
                     required
@@ -74,12 +85,12 @@ const user = computed(() => page.props.auth.user);
             </div>
 
             <div v-if="page.props.mustVerifyEmail && !user.email_verified_at">
-                <p class="-mt-4 text-sm text-muted-foreground">
+                <p class="-mt-4 text-muted-foreground text-sm">
                     Your email address is unverified.
                     <Link
                         :href="send()"
                         as="button"
-                        class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                        class="text-foreground decoration-neutral-300 hover:decoration-current! dark:decoration-neutral-500 underline underline-offset-4 transition-colors duration-300 ease-out"
                     >
                         Click here to re-send the verification email.
                     </Link>
@@ -87,7 +98,7 @@ const user = computed(() => page.props.auth.user);
 
                 <div
                     v-if="page.props.status === 'verification-link-sent'"
-                    class="mt-2 text-sm font-medium text-green-600"
+                    class="mt-2 font-medium text-green-600 text-sm"
                 >
                     A new verification link has been sent to your email address.
                 </div>

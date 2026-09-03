@@ -6,10 +6,12 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
@@ -31,6 +33,8 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    protected $appends = ['profile_picture_url'];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -42,5 +46,23 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    protected function profilePictureUrl(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if (! $this->profile_picture) {
+                    return null;
+                }
+
+                return cache()->remember("user_{$this->id}_avatar_url", now()->addHours(1), function () {
+                    return Storage::disk('s3')->temporaryUrl(
+                        $this->profile_picture,
+                        now()->addHours(2)
+                    );
+                });
+            }
+        );
     }
 }

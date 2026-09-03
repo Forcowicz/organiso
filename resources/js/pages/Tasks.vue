@@ -27,10 +27,6 @@ const props = defineProps<{
 const taskStore = useTaskStore();
 taskStore.setTasks(props.tasks);
 
-const taskForm = useTaskForm({
-    submitter: taskService.store,
-});
-
 const modalStore = useModalStore();
 </script>
 
