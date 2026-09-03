@@ -1,3 +1,4 @@
 resources/js/components/ui/*
 !resources/js/components/ui/text-badge
+!resources/js/components/ui/textarea
 resources/views/mail/*

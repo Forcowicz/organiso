@@ -6,6 +6,9 @@ import { useTaskForm } from '@/composables/useTaskForm';
 import { taskService } from '@/services/taskService';
 import { useModalStore } from '@/stores/modalStore';
 import { useTaskStore } from '@/stores/taskStore';
+import Input from '../ui/input/Input.vue';
+import Label from '../ui/label/Label.vue';
+import TextArea from '../ui/textarea/TextArea.vue';
 
 const taskStore = useTaskStore();
 const modalStore = useModalStore();
@@ -40,22 +43,37 @@ function toggleImportant() {
         @submit.prevent="handleSubmit"
     >
         <!-- Task Name -->
-        <div class="flex flex-col gap-1">
-            <input
-                v-model="form.name"
-                type="text"
-                required
-                placeholder="Co jest do zrobienia?"
-                class="bg-transparent p-0 border-0 outline-none focus:ring-0 w-full font-semibold text-slate-900 placeholder:text-slate-400 text-sm leading-tight"
-            />
+        <div class="gap-6 grid">
+            <div class="gap-2 grid">
+                <Label for="name">Co jest do zrobienia?</Label>
 
-            <!-- Task Description -->
-            <textarea
-                v-model="form.description"
-                rows="2"
-                placeholder="Dodaj opis zadania (opcjonalnie)..."
-                class="bg-transparent p-0 border-0 outline-none focus:ring-0 w-full text-slate-600 placeholder:text-slate-400 text-xs leading-relaxed resize-none"
-            ></textarea>
+                <Input
+                    v-model="form.name"
+                    type="text"
+                    id="name"
+                    :tabindex="1"
+                    required
+                    autofocus
+                    placeholder="Posprzątaj balkon..."
+                />
+
+                <!-- <InputError :message="errors.name" /> -->
+            </div>
+
+            <div class="gap-2 grid">
+                <Label for="description"
+                    >Opisz swoje zadanie (jeśli potrzebujesz)</Label
+                >
+
+                <TextArea
+                    v-model="form.description"
+                    rows="2"
+                    name="description"
+                    placeholder="Niektóre graty mogą być jeszcze potrzebne..."
+                ></TextArea>
+
+                <!-- <InputError :message="errors.description" /> -->
+            </div>
         </div>
 
         <!-- Divider -->

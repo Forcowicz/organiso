@@ -7,6 +7,8 @@ export interface ITask {
     completed_at: string | null;
     due_date: string | null;
     due_time: string | null;
+    is_urgent: boolean;
+    is_important: boolean;
     user_id: number;
 
     user: User;

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { Clock } from '@lucide/vue';
-import { useDateFormat, useTimeAgo, useTimeAgoIntl } from '@vueuse/core';
+import { Astroid, Clock, ShieldAlert } from '@lucide/vue';
+import { useDateFormat, useTimeAgoIntl } from '@vueuse/core';
 import { computed } from 'vue';
+import { useTimeAgoDays } from '@/composables/useTimeAgoDays.js';
 import TextBadge from '../ui/text-badge/TextBadge.vue';
 import TaskCheckbox from './TaskCheckbox.vue';
 import type { ITask } from '.';
-import { useTimeAgoDays } from '@/composables/useTimeAgoDays.js';
 
 const props = defineProps<{
     taskData: ITask;
@@ -74,12 +74,28 @@ const emits = defineEmits<{
                 {{ props.taskData.description }}
             </p>
 
-            <TextBadge
-                v-if="deadlineFormatted"
-                :icon="Clock"
-                :content="deadlineFormatted"
-                class="text-slate-500 dark:text-slate-400"
-            />
+            <div class="flex items-center gap-4">
+                <TextBadge
+                    v-if="deadlineFormatted"
+                    :icon="Clock"
+                    :content="deadlineFormatted"
+                    class="text-slate-500 dark:text-slate-400"
+                />
+
+                <TextBadge
+                    v-if="props.taskData.is_urgent"
+                    :icon="ShieldAlert"
+                    content="Pilne"
+                    class="text-purple-500"
+                />
+
+                <TextBadge
+                    v-if="props.taskData.is_important"
+                    :icon="Astroid"
+                    content="Ważne"
+                    class="text-blue-500"
+                />
+            </div>
         </div>
     </div>
 </template>

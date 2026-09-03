@@ -1,5 +1,5 @@
-import { ITask } from '@/components/Task';
 import { reactive } from 'vue';
+import type { ITask } from '@/components/Task';
 
 export interface TaskForm {
     name: string;
