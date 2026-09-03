@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { Form, Head, usePage } from '@inertiajs/vue3';
 import { Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, onUnmounted, ref } from 'vue';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/DeleteUser.vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useInitials } from '@/composables/useInitials';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
 
@@ -25,6 +27,29 @@ defineOptions({
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+const { getInitials } = useInitials();
+
+const previewUrl = ref<string | null>(null);
+const avatarSrc = computed(() => previewUrl.value || user.value.profile_picture_url || null);
+
+const onFileChange = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+
+    if (file) {
+        if (previewUrl.value) {
+            URL.revokeObjectURL(previewUrl.value);
+        }
+
+        previewUrl.value = URL.createObjectURL(file);
+    }
+};
+
+onUnmounted(() => {
+    if (previewUrl.value) {
+        URL.revokeObjectURL(previewUrl.value);
+    }
+});
 </script>
 
 <template>
@@ -44,15 +69,38 @@ const user = computed(() => page.props.auth.user);
             class="space-y-6"
             v-slot="{ errors, processing }"
         >
-            <div class="gap-2 grid">
+            <div class="gap-3 grid">
                 <Label for="profile_picture">Profile picture</Label>
-                <Input
-                    id="profile_picture"
-                    class="block mt-1 w-full"
-                    name="profile_picture"
-                    type="file"
-                />
-                <InputError class="mt-2" :message="errors.profile_picture" />
+
+                <div class="flex items-center gap-4">
+                    <Avatar class="size-16 rounded-full border border-border shadow-xs shrink-0">
+                        <AvatarImage
+                            v-if="avatarSrc"
+                            :src="avatarSrc!"
+                            :alt="user.name"
+                            class="object-cover"
+                        />
+                        <AvatarFallback class="bg-muted text-base font-semibold text-foreground">
+                            {{ getInitials(user.name) }}
+                        </AvatarFallback>
+                    </Avatar>
+
+                    <div class="flex-1 space-y-1.5">
+                        <Input
+                            id="profile_picture"
+                            class="block w-full cursor-pointer file:cursor-pointer"
+                            name="profile_picture"
+                            type="file"
+                            accept="image/*"
+                            @change="onFileChange"
+                        />
+                        <p class="text-xs text-muted-foreground">
+                            PNG, JPG or WEBP. Max 2MB.
+                        </p>
+                    </div>
+                </div>
+
+                <InputError class="mt-1" :message="errors.profile_picture" />
             </div>
 
             <div class="gap-2 grid">
