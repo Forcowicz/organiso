@@ -20,7 +20,6 @@ const showAvatar = computed(
     () =>
         props.user.profile_picture_url && props.user.profile_picture_url !== '',
 );
-console.log(props.user);
 </script>
 
 <template>
