@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Clock } from '@lucide/vue';
-import { useDateFormat, useTimeAgoIntl } from '@vueuse/core';
+import { useDateFormat, useTimeAgo, useTimeAgoIntl } from '@vueuse/core';
 import { computed } from 'vue';
 import TextBadge from '../ui/text-badge/TextBadge.vue';
 import TaskCheckbox from './TaskCheckbox.vue';
 import type { ITask } from '.';
+import { useTimeAgoDays } from '@/composables/useTimeAgoDays.js';
 
 const props = defineProps<{
     taskData: ITask;
@@ -29,17 +30,13 @@ const timestamp = useDateFormat(dueDate, dateFormatPattern, {
     locales: 'pl-PL',
 });
 
-const countdownOptions = props.taskData.due_time
-    ? {}
-    : {
-          units: [
-              { max: Infinity, value: 31_536_000_000, name: 'year' },
-              { max: 31_536_000_000, value: 2_592_000_000, name: 'month' },
-              { max: 2_592_000_000, value: 604_800_000, name: 'week' },
-              { max: 604_800_000, value: 86_400_000, name: 'day' },
-          ],
-      };
-const countdown = useTimeAgoIntl(dueDate, countdownOptions);
+let countdown;
+
+if (props.taskData.due_time) {
+    countdown = useTimeAgoIntl(dueDate);
+} else {
+    countdown = useTimeAgoDays(dueDate);
+}
 
 const deadlineFormatted = computed(() => {
     if (!dueDate.value) {
@@ -56,7 +53,7 @@ const emits = defineEmits<{
 
 <template>
     <div
-        class="flex items-start gap-3.5 rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm transition-colors hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
+        class="flex items-start gap-3.5 bg-white dark:bg-slate-900 shadow-sm p-4 border border-slate-200/80 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700 rounded-xl transition-colors"
     >
         <TaskCheckbox
             @click="emits('completed', props.taskData.id)"
@@ -65,14 +62,14 @@ const emits = defineEmits<{
 
         <div class="flex flex-col gap-1">
             <h4
-                class="text-sm leading-tight font-semibold text-slate-900 dark:text-slate-100"
+                class="font-semibold text-slate-900 dark:text-slate-100 text-sm leading-tight"
             >
                 {{ props.taskData.name }}
             </h4>
 
             <p
                 v-if="props.taskData.description"
-                class="text-xs leading-relaxed text-slate-500 dark:text-slate-400"
+                class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed"
             >
                 {{ props.taskData.description }}
             </p>
