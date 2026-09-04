@@ -33,7 +33,7 @@ class TaskController extends Controller
                 WHEN NOT is_urgent and is_important THEN 2
                 WHEN NOT is_urgent and NOT is_important THEN 3
             END AS priority
-            "))->orderBy('priority', 'asc');
+            "))->where('user_id', Auth::user()->id)->where('completed_at', null)->orderBy('priority', 'asc');
         }
 
         return Inertia::render('Tasks', [
