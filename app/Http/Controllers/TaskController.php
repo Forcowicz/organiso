@@ -6,6 +6,8 @@ use App\Http\Requests\StoreTaskRequest;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class TaskController extends Controller
@@ -13,12 +15,29 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $tasks = Task::with('user')->where('user_id', Auth::user()->id)->where('completed_at', null)->orderBy('due_date', 'asc')->get();
+        $taskQuery = Task::with('user');
+
+        $sortingAlgorithm = $request->sort ?? 'eisenhower';
+
+        Log::info("Our sorting algorithm is $sortingAlgorithm");
+
+        if ($sortingAlgorithm === 'deadline') {
+            $taskQuery->select(DB::raw("*, (due_date + coalesce(due_time, '23:59:00')) AS timestamp"))->where('user_id', Auth::user()->id)->where('completed_at', null)->orderBy('timestamp', 'asc');
+        } else if ($sortingAlgorithm === 'eisenhower') {
+            $taskQuery->select(DB::raw("
+            *, CASE
+                WHEN is_urgent and is_important THEN 0
+                WHEN is_urgent and NOT is_important THEN 1
+                WHEN NOT is_urgent and is_important THEN 2
+                WHEN NOT is_urgent and NOT is_important THEN 3
+            END AS priority
+            "))->orderBy('priority', 'asc');
+        }
 
         return Inertia::render('Tasks', [
-            'tasks' => $tasks
+            'tasks' => fn() => $taskQuery->get()
         ]);
     }
 

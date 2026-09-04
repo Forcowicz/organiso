@@ -25,10 +25,7 @@ const { width } = useWindowSize();
                 <SheetDescription> Description goes here </SheetDescription>
             </SheetHeader>
 
-            <StoreTaskForm
-                v-if="modalStore.activeModal?.id === 'store-task'"
-                :form="modalStore.activeModal.form"
-            />
+            <StoreTaskForm v-if="modalStore.activeModal?.id === 'store-task'" />
         </SheetContent>
     </Sheet>
 </template>
