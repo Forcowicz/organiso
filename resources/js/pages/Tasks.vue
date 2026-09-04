@@ -47,10 +47,6 @@ const isDropdownOpen = ref(false);
 const sortingAlgorithm = computed(() => {
     const queryParams = new URLSearchParams(window.location.search);
 
-    if (!queryParams.has('sort')) {
-        return null;
-    }
-
     switch (queryParams.get('sort')) {
         case 'eisenhower':
             return 'Eisenhower Matrix';
@@ -59,8 +55,6 @@ const sortingAlgorithm = computed(() => {
         default:
             return 'Eisenhower Matrix';
     }
-
-    return null;
 });
 </script>
 
