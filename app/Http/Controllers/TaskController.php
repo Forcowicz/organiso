@@ -24,7 +24,7 @@ class TaskController extends Controller
         Log::info("Our sorting algorithm is $sortingAlgorithm");
 
         if ($sortingAlgorithm === 'deadline') {
-            $taskQuery->select(DB::raw("*, (due_date + coalesce(due_time, '23:59:00')) AS timestamp"))->where('user_id', Auth::user()->id)->where('completed_at', null)->orderBy('timestamp', 'asc');
+            $taskQuery->select(DB::raw("*, (due_date + coalesce(due_time, '23:59:59')) AS timestamp"))->where('user_id', Auth::user()->id)->where('completed_at', null)->orderBy('timestamp', 'asc');
         } else if ($sortingAlgorithm === 'eisenhower') {
             $taskQuery->select(DB::raw("
             *, CASE

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Astroid, Clock, ShieldAlert } from '@lucide/vue';
-import { useDateFormat, useTimeAgoIntl } from '@vueuse/core';
+import { useDateFormat, useTimeAgoIntl, useTimestamp } from '@vueuse/core';
 import { computed } from 'vue';
 import { useTimeAgoDays } from '@/composables/useTimeAgoDays.js';
 import TextBadge from '../ui/text-badge/TextBadge.vue';
@@ -19,7 +19,7 @@ const dueDate = computed(() => {
 
     return props.taskData.due_time
         ? new Date(`${props.taskData.due_date}T${props.taskData.due_time}`)
-        : new Date(props.taskData.due_date);
+        : new Date(`${props.taskData.due_date}T23:59:59`);
 });
 
 const dateFormatPattern = computed(() =>
@@ -49,6 +49,18 @@ const deadlineFormatted = computed(() => {
 const emits = defineEmits<{
     completed: [id: string];
 }>();
+
+const now = useTimestamp({ interval: 1000 * 60 });
+
+const remainingMs = computed(() => {
+    if (!dueDate.value) {
+        return 0;
+    }
+
+    return dueDate.value.getTime() - now.value;
+});
+
+const isOverdue = computed(() => remainingMs.value < 0);
 </script>
 
 <template>
@@ -80,6 +92,7 @@ const emits = defineEmits<{
                     :icon="Clock"
                     :content="deadlineFormatted"
                     class="text-slate-500 dark:text-slate-400"
+                    :class="{ 'text-red-500': isOverdue }"
                 />
 
                 <TextBadge
