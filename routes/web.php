@@ -7,12 +7,13 @@ Route::inertia('/', 'Welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+
+    Route::controller(TaskController::class)->group(function () {
+        Route::get('/tasks', 'index')->name('tasks.index');
+        Route::post('/tasks', 'store')->name('tasks.store');
+        Route::patch('/tasks/{task}', 'update')->name('tasks.update');
+    })->middleware(['auth', 'verified']);
 });
 
-Route::controller(TaskController::class)->group(function () {
-    Route::get('/tasks', 'index')->name('tasks.index');
-    Route::post('/tasks', 'store')->name('tasks.store');
-    Route::patch('/tasks/{task}', 'update')->name('tasks.update');
-})->middleware(['auth', 'verified']);
 
 require __DIR__ . '/settings.php';
