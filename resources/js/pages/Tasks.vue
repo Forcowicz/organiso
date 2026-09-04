@@ -56,6 +56,8 @@ const sortingAlgorithm = computed(() => {
             return 'Eisenhower Matrix';
         case 'deadline':
             return 'Deadline';
+        default:
+            return 'Eisenhower Matrix';
     }
 
     return null;
