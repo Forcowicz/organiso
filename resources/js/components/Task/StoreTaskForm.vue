@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Calendar, Clock, Flame, Plus, Star } from '@lucide/vue';
-import { ref } from 'vue';
+import { onMounted, ref, useTemplateRef } from 'vue';
 import { Button } from '@/components/ui/button';
 import { useTaskForm } from '@/composables/useTaskForm';
 import { taskService } from '@/services/taskService';
@@ -9,6 +9,8 @@ import { useTaskStore } from '@/stores/taskStore';
 import Input from '../ui/input/Input.vue';
 import Label from '../ui/label/Label.vue';
 import TextArea from '../ui/textarea/TextArea.vue';
+import { Form } from '@inertiajs/vue3';
+import { store } from '@/routes/tasks/index.js';
 
 const taskStore = useTaskStore();
 const modalStore = useModalStore();
@@ -28,19 +30,24 @@ async function handleSubmit() {
     }
 }
 
+const dateInputValue = ref('');
+const isUrgent = ref(false);
+const isImportant = ref(false);
+
 function toggleUrgent() {
-    form.is_urgent = !form.is_urgent;
+    isUrgent.value = !isUrgent.value;
 }
 
 function toggleImportant() {
-    form.is_important = !form.is_important;
+    isImportant.value = !isImportant.value;
 }
 </script>
 
 <template>
-    <form
+    <Form
         class="flex flex-col gap-3 bg-white p-4 rounded-xl transition-colors"
-        @submit.prevent="handleSubmit"
+        :action="store()"
+        #default="{ processing }"
     >
         <!-- Task Name -->
         <div class="gap-6 grid">
@@ -48,9 +55,9 @@ function toggleImportant() {
                 <Label for="name">Co jest do zrobienia?</Label>
 
                 <Input
-                    v-model="form.name"
                     type="text"
                     id="name"
+                    name="name"
                     :tabindex="1"
                     required
                     autofocus
@@ -68,6 +75,7 @@ function toggleImportant() {
                 <TextArea
                     v-model="form.description"
                     rows="2"
+                    id="description"
                     name="description"
                     placeholder="Niektóre graty mogą być jeszcze potrzebne..."
                 ></TextArea>
@@ -89,7 +97,9 @@ function toggleImportant() {
                 >
                     <Calendar class="size-3.5 text-slate-500 shrink-0" />
                     <input
-                        v-model="form.due_date"
+                        ref="dueDateInput"
+                        v-model="dateInputValue"
+                        name="due_date"
                         type="date"
                         class="bg-transparent p-0 border-0 outline-none focus:ring-0 text-slate-700 text-xs cursor-pointer"
                     />
@@ -99,75 +109,85 @@ function toggleImportant() {
                 <label
                     class="flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100/80 px-2.5 py-1.5 border border-slate-200/80 focus-within:border-slate-400 rounded-lg text-slate-600 text-xs transition-colors cursor-pointer"
                     :class="{
-                        'cursor-not-allowed opacity-50': !form.due_date,
+                        'cursor-not-allowed opacity-50': !dateInputValue,
                     }"
                 >
                     <Clock class="size-3.5 text-slate-500 shrink-0" />
                     <input
-                        v-model="form.due_time"
+                        :disabled="!dateInputValue"
+                        name="due_time"
                         type="time"
-                        :disabled="!form.due_date"
                         class="bg-transparent p-0 border-0 outline-none focus:ring-0 text-slate-700 text-xs cursor-pointer disabled:cursor-not-allowed"
                     />
                 </label>
 
                 <!-- Urgent Flag (Eisenhower Matrix) -->
-                <button
-                    type="button"
+                <label
                     class="flex items-center gap-1.5 px-2.5 py-1.5 border rounded-lg font-medium text-xs transition-all cursor-pointer select-none"
+                    for="is_urgent"
                     :class="
-                        form.is_urgent
+                        isUrgent
                             ? 'border-red-200 bg-red-50 text-red-700 shadow-xs ring-1 ring-red-200'
                             : 'border-slate-200/80 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                     "
-                    @click="toggleUrgent"
                 >
                     <Flame
                         class="size-3.5 transition-colors"
                         :class="
-                            form.is_urgent
+                            isUrgent
                                 ? 'fill-red-500/20 text-red-500'
                                 : 'text-slate-400'
                         "
                     />
                     <span>Pilne</span>
-                </button>
+                </label>
+                <input
+                    v-model="isUrgent"
+                    type="checkbox"
+                    name="is_urgent"
+                    id="is_urgent"
+                    class="hidden"
+                />
 
                 <!-- Important Flag (Eisenhower Matrix) -->
-                <button
-                    type="button"
+                <label
                     class="flex items-center gap-1.5 px-2.5 py-1.5 border rounded-lg font-medium text-xs transition-all cursor-pointer select-none"
+                    for="is_important"
                     :class="
-                        form.is_important
+                        isImportant
                             ? 'border-amber-200 bg-amber-50 text-amber-700 shadow-xs ring-1 ring-amber-200'
                             : 'border-slate-200/80 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                     "
-                    @click="toggleImportant"
                 >
                     <Star
                         class="size-3.5 transition-colors"
                         :class="
-                            form.is_important
+                            isImportant
                                 ? 'fill-amber-500/20 text-amber-500'
                                 : 'text-slate-400'
                         "
                     />
                     <span>Ważne</span>
-                </button>
+                </label>
+                <input
+                    v-model="isImportant"
+                    type="checkbox"
+                    name="is_important"
+                    id="is_important"
+                    class="hidden"
+                />
             </div>
 
             <!-- Right Group: Submit Button -->
             <Button
                 type="submit"
                 size="sm"
-                :disabled="!form.name.trim() || isSubmitting"
+                :disabled="processing"
                 class="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 shadow-xs px-3.5 py-1.5 rounded-lg font-medium text-white text-xs transition-colors cursor-pointer disabled:cursor-not-allowed"
             >
                 <Plus class="size-3.5" />
-                <span>{{
-                    isSubmitting ? 'Dodawanie...' : 'Dodaj zadanie'
-                }}</span>
+                <span>{{ processing ? 'Dodawanie...' : 'Dodaj zadanie' }}</span>
             </Button>
         </div>
-    </form>
+    </Form>
 </template>

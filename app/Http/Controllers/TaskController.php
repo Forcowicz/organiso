@@ -56,10 +56,7 @@ class TaskController extends Controller
         $task->user_id = $request->user()->id;
         $task->save();
 
-        return response()->json([
-            'status' => 'success',
-            'task' => $task
-        ], 201);
+        return redirect()->back();
     }
 
     /**
