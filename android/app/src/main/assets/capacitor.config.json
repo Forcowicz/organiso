@@ -1,0 +1,13 @@
+{
+	"appId": "eu.organiso.app",
+	"appName": "Organiso",
+	"webDir": "public",
+	"server": {
+		"url": "https://app.organiso.eu",
+		"cleartext": false,
+		"androidScheme": "https"
+	},
+	"android": {
+		"allowMixedContent": true
+	}
+}
