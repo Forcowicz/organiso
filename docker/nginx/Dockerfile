@@ -1,37 +1,50 @@
 # ---------------------------------------------------------------------------
-# Builder stage — Node LTS (Alpine) + php-cli
+# php-app builder — installs Composer dependencies (vendor/) and pre-generates
+# Wayfinder TypeScript types via `php artisan wayfinder:generate`.
+# We reuse the same base image as the php-fpm Dockerfile so that PHP + all
+# extensions are already present and artisan can fully bootstrap Laravel.
 # ---------------------------------------------------------------------------
-# node:lts-alpine gives us the latest Node LTS release (currently v24 LTS)
-# with npm bundled.
-#
-# php-cli is required because the @laravel/vite-plugin-wayfinder plugin calls
-# `php artisan wayfinder:generate --with-form` during `npm run build`.
-# Artisan needs a minimal .env to bootstrap Laravel (APP_KEY + a dummy DB
-# driver so it never tries to open a real DB connection).
-# ---------------------------------------------------------------------------
-FROM node:lts-alpine AS builder
+FROM php:8.5-fpm AS php-app
 
-# APP_KEY must be passed at build time:
-#   docker build --build-arg APP_KEY="base64:..." .
-# In compose.prod.yaml, add `args: [APP_KEY]` under the web.build section
-# (Docker Compose will read APP_KEY from your .env file automatically).
-ARG APP_KEY
-
-RUN apk add --no-cache php83 php83-cli php83-common \
-        php83-tokenizer php83-xml php83-xmlwriter php83-phar \
-        php83-mbstring php83-openssl php83-curl php83-fileinfo \
-        php83-dom php83-json php83-pcntl php83-posix \
-    && ln -sf /usr/bin/php83 /usr/local/bin/php
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl unzip libpq-dev libonig-dev libssl-dev libxml2-dev \
+    libcurl4-openssl-dev libicu-dev libzip-dev \
+    && docker-php-ext-install -j$(nproc) pdo_pgsql pgsql intl zip bcmath soap \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 WORKDIR /var/www
 
-# Copy the full application so artisan + vendor are available
 COPY . /var/www
 
-# Create a minimal .env so that `php artisan` can bootstrap Laravel.
-# - APP_KEY: provided via build arg (required by Illuminate encryption).
-# - DB_CONNECTION=sqlite with in-memory DB: prevents any real DB connection.
-RUN printf 'APP_NAME=organiso\nAPP_ENV=production\nAPP_KEY=%s\nAPP_DEBUG=false\nDB_CONNECTION=sqlite\nDB_DATABASE=:memory:\n' "$APP_KEY" > /var/www/.env
+# Install Composer dependencies (no dev, optimised autoloader)
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    && composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist
+
+# Create a minimal .env so artisan can bootstrap (APP_KEY + dummy sqlite DB).
+# APP_KEY is passed as a build arg from compose.prod.yaml / docker build --build-arg.
+ARG APP_KEY
+RUN printf 'APP_NAME=organiso\nAPP_ENV=production\nAPP_KEY=%s\nAPP_DEBUG=false\nDB_CONNECTION=sqlite\nDB_DATABASE=/tmp/build.sqlite\n' "$APP_KEY" > /var/www/.env
+
+# Pre-generate Wayfinder TypeScript types.
+# This runs before the Vite build so the generated files exist in
+# resources/js/actions, resources/js/routes, resources/js/wayfinder.
+RUN php artisan wayfinder:generate --with-form
+
+# ---------------------------------------------------------------------------
+# Node builder — builds the frontend assets with Vite.
+# WAYFINDER_COMMAND=true tells the wayfinder Vite plugin to skip re-running
+# `php artisan wayfinder:generate` (files are already generated above).
+# ---------------------------------------------------------------------------
+FROM node:lts-alpine AS node-builder
+
+WORKDIR /var/www
+
+# Copy the full application including the pre-generated wayfinder files
+COPY --from=php-app /var/www /var/www
+
+ENV WAYFINDER_COMMAND=true
 
 RUN npm ci && npm run build
 
@@ -42,7 +55,7 @@ FROM nginx:alpine
 
 COPY ./docker/nginx/nginx.conf /etc/nginx/nginx.conf
 
-COPY --from=builder /var/www/public /var/www/public
+COPY --from=node-builder /var/www/public /var/www/public
 
 WORKDIR /var/www/public
 
