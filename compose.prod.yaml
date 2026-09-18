@@ -4,10 +4,8 @@ services:
       context: .
       dockerfile: ./docker/nginx/Dockerfile
       args:
-        # APP_KEY is forwarded from the .env file to the Dockerfile ARG.
-        # It allows `php artisan` to bootstrap Laravel during `npm run build`
-        # (required by the wayfinder Vite plugin).
         APP_KEY: ${APP_KEY}
+        WWWUSER: '${WWWUSER:-1000}'
     restart: unless-stopped # Automatically restart unless the service is explicitly stopped
     volumes:
       # Mount the 'organiso-storage' volume to '/var/www/storage' inside the container.
