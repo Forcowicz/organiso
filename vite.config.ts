@@ -5,6 +5,7 @@ import vue from '@vitejs/plugin-vue';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
 import { defineConfig } from 'vite';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 
 export default defineConfig({
     plugins: [
@@ -17,6 +18,7 @@ export default defineConfig({
                 }),
             ],
         }),
+        basicSsl(),
         inertia(),
         tailwindcss(),
         vue({
@@ -41,5 +43,8 @@ export default defineConfig({
                 '**/vendor/**',
             ],
         },
+        https: true,
+        port: 8090,
+        host: true,
     },
 });
