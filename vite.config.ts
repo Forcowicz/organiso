@@ -44,7 +44,7 @@ export default defineConfig({
             ],
         },
         https: true,
-        port: 8090,
+        port: 5173,
         host: true,
     },
 });
