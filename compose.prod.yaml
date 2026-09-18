@@ -29,7 +29,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/common/php-fpm/Dockerfile
-      target: production
+      target: production # Use the 'production' stage in the Dockerfile
     restart: unless-stopped
     volumes:
       - organiso-storage-production:/var/www/storage
@@ -53,9 +53,9 @@ services:
     ports:
       - "${DB_PORT}:5432"
     environment:
-      - DB_DATABASE=${POSTGRES_DATABASE}
-      - DB_USER=${POSTGRES_USERNAME}
-      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - postgres-data-production:/var/lib/postgresql
     networks:
