@@ -14,6 +14,9 @@ const config: CapacitorConfig = {
     android: {
         allowMixedContent: true,
     },
+    cordova: {
+        preferences: {},
+    },
 };
 
 export default config;
