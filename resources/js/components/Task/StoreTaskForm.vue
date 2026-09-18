@@ -122,9 +122,10 @@ function toggleImportant() {
                 </label>
 
                 <!-- Urgent Flag (Eisenhower Matrix) -->
-                <label
+                <button
+                    type="button"
+                    @click="toggleUrgent"
                     class="flex items-center gap-1.5 px-2.5 py-1.5 border rounded-lg font-medium text-xs transition-all cursor-pointer select-none"
-                    for="is_urgent"
                     :class="
                         isUrgent
                             ? 'border-red-200 bg-red-50 text-red-700 shadow-xs ring-1 ring-red-200'
@@ -140,19 +141,18 @@ function toggleImportant() {
                         "
                     />
                     <span>Pilne</span>
-                </label>
+                </button>
                 <input
-                    v-model="isUrgent"
-                    type="checkbox"
+                    type="hidden"
                     name="is_urgent"
-                    id="is_urgent"
-                    class="hidden"
+                    :value="isUrgent ? '1' : '0'"
                 />
 
                 <!-- Important Flag (Eisenhower Matrix) -->
-                <label
+                <button
+                    type="button"
+                    @click="toggleImportant"
                     class="flex items-center gap-1.5 px-2.5 py-1.5 border rounded-lg font-medium text-xs transition-all cursor-pointer select-none"
-                    for="is_important"
                     :class="
                         isImportant
                             ? 'border-amber-200 bg-amber-50 text-amber-700 shadow-xs ring-1 ring-amber-200'
@@ -168,13 +168,11 @@ function toggleImportant() {
                         "
                     />
                     <span>Ważne</span>
-                </label>
+                </button>
                 <input
-                    v-model="isImportant"
-                    type="checkbox"
+                    type="hidden"
                     name="is_important"
-                    id="is_important"
-                    class="hidden"
+                    :value="isImportant ? '1' : '0'"
                 />
             </div>
 
