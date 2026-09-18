@@ -4,7 +4,7 @@
 # We reuse the same base image as the php-fpm Dockerfile so that PHP + all
 # extensions are already present and artisan can fully bootstrap Laravel.
 # ---------------------------------------------------------------------------
-FROM php:8.5-fpm AS php-app
+FROM php:8.4-fpm AS php-app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl unzip libpq-dev libonig-dev libssl-dev libxml2-dev \

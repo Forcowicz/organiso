@@ -1,4 +1,4 @@
-FROM php:8.5-fpm AS builder
+FROM php:8.4-fpm AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
@@ -28,7 +28,7 @@ COPY . /var/www
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist
 
-FROM php:8.5-fpm AS production
+FROM php:8.4-fpm AS production
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
