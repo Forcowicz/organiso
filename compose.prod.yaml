@@ -64,7 +64,9 @@ services:
     volumes:
       - postgres-data-production:/var/lib/postgresql
     networks:
-      - organiso-production
+      organiso-production:
+        aliases:
+          - pgsql
     healthcheck:
       test: ["CMD", "pg_isready"]
       interval: 10s
