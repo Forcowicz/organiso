@@ -5,11 +5,9 @@ const config: CapacitorConfig = {
     appName: 'Organiso',
     webDir: 'public',
     server: {
-        // url: 'https://app.organiso.eu',
-        // cleartext: false,
-        url: 'http://localhost:8090',
-        cleartext: true,
-        androidScheme: 'http',
+        url: 'https://app.organiso.eu',
+        cleartext: false,
+        androidScheme: 'https',
     },
     android: {
         allowMixedContent: true,
