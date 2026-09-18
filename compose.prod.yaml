@@ -8,13 +8,11 @@ services:
         WWWUSER: '${WWWUSER:-1000}'
     restart: unless-stopped # Automatically restart unless the service is explicitly stopped
     volumes:
-      # Mount the 'organiso-storage' volume to '/var/www/storage' inside the container.
-      # -----------------------------------------------------------
-      # This volume stores persistent data like uploaded files and cache.
-      # The ':ro' option mounts it as read-only in the 'web' service because Nginx only needs to read these files.
-      # The 'php-fpm' service mounts the same volume without ':ro' to allow write operations.
-      # -----------------------------------------------------------
       - organiso-storage-production:/var/www/storage:ro
+      # Shared volume populated by this container's entrypoint on startup.
+      # php-fpm mounts it read-only to access public/build/.vite/manifest.json
+      # which is required by the @vite() blade directive to generate asset URLs.
+      - organiso-public-build:/var/www/public/build
     networks:
       - organiso-production
     ports:
@@ -36,6 +34,9 @@ services:
     restart: unless-stopped
     volumes:
       - organiso-storage-production:/var/www/storage
+      # Read-only access to the Vite manifest so @vite() can generate hashed asset URLs.
+      # Populated by the nginx container's entrypoint before nginx starts.
+      - organiso-public-build:/var/www/public/build:ro
     env_file:
       - .env
     networks:
@@ -93,3 +94,5 @@ networks:
 volumes:
   postgres-data-production:
   organiso-storage-production:
+  # Vite build output shared between nginx (serves assets) and php-fpm (reads manifest).
+  organiso-public-build:

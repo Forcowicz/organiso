@@ -54,10 +54,17 @@ RUN npm ci && npm run build
 FROM nginx:alpine
 
 COPY ./docker/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY ./docker/nginx/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 COPY --from=node-builder /var/www/public /var/www/public
+
+# Keep a separate copy of the built assets so the shared Docker volume mounted
+# at /var/www/public/build doesn't shadow these files on startup.
+# The entrypoint.sh copies from here to the volume before nginx starts.
+RUN cp -r /var/www/public/build /var/www/public-build-baked
 
 WORKDIR /var/www/public
 
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/entrypoint.sh"]
