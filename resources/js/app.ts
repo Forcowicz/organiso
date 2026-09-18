@@ -6,6 +6,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
+import { App } from '@capacitor/app';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const pinia = createPinia();
@@ -40,3 +41,11 @@ initializeTheme();
 
 // This will listen for flash toast data from the server...
 initializeFlashToast();
+
+App.addListener('backButton', ({ canGoBack }) => {
+    if (!canGoBack) {
+        App.exitApp();
+    } else {
+        window.history.back();
+    }
+});
