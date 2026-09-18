@@ -1,34 +1,15 @@
 <script setup lang="ts">
-import { Calendar, Clock, Flame, Plus, Star } from '@lucide/vue';
-import { onMounted, ref, useTemplateRef } from 'vue';
-import { Button } from '@/components/ui/button';
-import { useTaskForm } from '@/composables/useTaskForm';
-import { taskService } from '@/services/taskService';
-import { useModalStore } from '@/stores/modalStore';
-import { useTaskStore } from '@/stores/taskStore';
-import Input from '../ui/input/Input.vue';
-import Label from '../ui/label/Label.vue';
-import TextArea from '../ui/textarea/TextArea.vue';
 import { Form } from '@inertiajs/vue3';
+import { Calendar, Clock, Flame, Plus, Star } from '@lucide/vue';
+import { ref } from 'vue';
+import { Button } from '@/components/ui/button';
+import Input from '@/components/ui/input/Input.vue';
+import Label from '@/components/ui/label/Label.vue';
+import TextArea from '@/components/ui/textarea/TextArea.vue';
 import { store } from '@/routes/tasks/index.js';
+import { useModalStore } from '@/stores/modalStore';
 
-const taskStore = useTaskStore();
 const modalStore = useModalStore();
-
-const isSubmitting = ref(false);
-
-const { form, submit } = useTaskForm({
-    submitter: taskService.store,
-});
-
-async function handleSubmit() {
-    const newTask = await submit();
-
-    if (newTask) {
-        taskStore.addTask(newTask);
-        modalStore.close();
-    }
-}
 
 const dateInputValue = ref('');
 const isUrgent = ref(false);
@@ -41,12 +22,21 @@ function toggleUrgent() {
 function toggleImportant() {
     isImportant.value = !isImportant.value;
 }
+
+function handleSuccess() {
+    modalStore.close();
+    dateInputValue.value = '';
+    isUrgent.value = false;
+    isImportant.value = false;
+}
 </script>
 
 <template>
     <Form
         class="flex flex-col gap-3 bg-white p-4 rounded-xl transition-colors"
         :action="store()"
+        reset-on-success
+        @success="handleSuccess"
         #default="{ processing }"
     >
         <!-- Task Name -->
@@ -73,7 +63,6 @@ function toggleImportant() {
                 >
 
                 <TextArea
-                    v-model="form.description"
                     rows="2"
                     id="description"
                     name="description"
