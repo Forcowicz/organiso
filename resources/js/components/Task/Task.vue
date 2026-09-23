@@ -18,7 +18,7 @@ const emits = defineEmits<{
         class="flex items-start gap-3.5 bg-white dark:bg-slate-900 shadow-sm p-4 border border-slate-200/80 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700 rounded-xl transition-colors"
     >
         <TaskCheckbox
-            @click="emits('completed', props.taskData.id)"
+            @click.stop="emits('completed', props.taskData.id)"
             :disabled="props.isUpdating"
         />
 
