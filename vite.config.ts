@@ -31,11 +31,9 @@ export default defineConfig({
         }),
         wayfinder({
             formVariants: true,
-            // In Docker production builds, WAYFINDER_COMMAND is set to 'true'
-            // (a shell no-op) because the Dockerfile pre-generates the files
-            // via `php artisan wayfinder:generate` before `npm run build`.
-            // In dev, this env var is not set so it falls back to the default.
-            command: process.env.WAYFINDER_COMMAND ?? 'php artisan wayfinder:generate',
+            command:
+                process.env.WAYFINDER_COMMAND ??
+                'php artisan wayfinder:generate',
         }),
     ],
     server: {
@@ -50,6 +48,5 @@ export default defineConfig({
         },
         https: true,
         port: 5173,
-        host: true,
     },
 });
