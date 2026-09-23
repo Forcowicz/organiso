@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import { Astroid, Clock, ShieldAlert } from '@lucide/vue';
-import { useDateFormat, useTimeAgoIntl, useTimestamp } from '@vueuse/core';
-import { computed } from 'vue';
-import { useTimeAgoDays } from '@/composables/useTimeAgoDays.js';
-import TextBadge from '../ui/text-badge/TextBadge.vue';
+import TaskDetails from './partials/TaskDetails.vue';
 import TaskCheckbox from './TaskCheckbox.vue';
 import type { ITask } from '.';
 
@@ -12,55 +8,9 @@ const props = defineProps<{
     isUpdating: boolean;
 }>();
 
-const dueDate = computed(() => {
-    if (!props.taskData.due_date) {
-        return null;
-    }
-
-    return props.taskData.due_time
-        ? new Date(`${props.taskData.due_date}T${props.taskData.due_time}`)
-        : new Date(`${props.taskData.due_date}T23:59:59`);
-});
-
-const dateFormatPattern = computed(() =>
-    props.taskData.due_time ? 'D MMM YYYY, HH:mm' : 'D MMM YYYY',
-);
-
-const timestamp = useDateFormat(dueDate, dateFormatPattern, {
-    locales: 'pl-PL',
-});
-
-let countdown;
-
-if (props.taskData.due_time) {
-    countdown = useTimeAgoIntl(dueDate);
-} else {
-    countdown = useTimeAgoDays(dueDate);
-}
-
-const deadlineFormatted = computed(() => {
-    if (!dueDate.value) {
-        return null;
-    }
-
-    return `${timestamp.value} (${countdown.value})`;
-});
-
 const emits = defineEmits<{
     completed: [id: string];
 }>();
-
-const now = useTimestamp({ interval: 1000 * 60 });
-
-const remainingMs = computed(() => {
-    if (!dueDate.value) {
-        return 0;
-    }
-
-    return dueDate.value.getTime() - now.value;
-});
-
-const isOverdue = computed(() => remainingMs.value < 0);
 </script>
 
 <template>
@@ -86,29 +36,13 @@ const isOverdue = computed(() => remainingMs.value < 0);
                 {{ props.taskData.description }}
             </p>
 
-            <div class="flex items-center gap-4">
-                <TextBadge
-                    v-if="deadlineFormatted"
-                    :icon="Clock"
-                    :content="deadlineFormatted"
-                    class="text-slate-500 dark:text-slate-400"
-                    :class="{ 'text-red-500': isOverdue }"
-                />
-
-                <TextBadge
-                    v-if="props.taskData.is_urgent"
-                    :icon="ShieldAlert"
-                    content="Pilne"
-                    class="text-purple-500"
-                />
-
-                <TextBadge
-                    v-if="props.taskData.is_important"
-                    :icon="Astroid"
-                    content="Ważne"
-                    class="text-blue-500"
-                />
-            </div>
+            <TaskDetails
+                class="flex items-center gap-4"
+                :due-date="taskData.due_date!"
+                :due-time="taskData.due_time!"
+                :is-important="taskData.is_important"
+                :is-urgent="taskData.is_urgent"
+            />
         </div>
     </div>
 </template>

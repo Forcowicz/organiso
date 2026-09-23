@@ -1,21 +1,17 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
+import { ChevronRight, ClipboardClock, Grid2X2 } from '@lucide/vue';
+import { computed, ref } from 'vue';
 import type { ITask, SortAlgorithm } from '@/components/Task';
 import Task from '@/components/Task/Task.vue';
 import Button from '@/components/ui/button/Button.vue';
-import { useTaskForm } from '@/composables/useTaskForm';
+import DropdownMenu from '@/components/ui/dropdown-menu/DropdownMenu.vue';
+import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue';
+import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
+import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue';
 import taskRoutes from '@/routes/tasks';
-import { taskService } from '@/services/taskService';
 import { useModalStore } from '@/stores/modalStore';
 import { useTaskStore } from '@/stores/taskStore';
-import DropdownMenu from '@/components/ui/dropdown-menu/DropdownMenu.vue';
-import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue';
-import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue';
-import DropdownMenuLabel from '@/components/ui/dropdown-menu/DropdownMenuLabel.vue';
-import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue';
-import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
-import { ChevronRight, ClipboardClock, Grid2X2 } from '@lucide/vue';
-import { computed, Ref, ref } from 'vue';
 
 defineOptions({
     layout: {
@@ -56,6 +52,12 @@ const sortingAlgorithm = computed(() => {
             return 'Eisenhower Matrix';
     }
 });
+
+async function handleTaskClick(id: string) {
+    await taskStore.fetchTask(id);
+
+    modalStore.open({ id: 'show-task' });
+}
 </script>
 
 <template>
@@ -114,6 +116,7 @@ const sortingAlgorithm = computed(() => {
                     :task-data="task"
                     :is-updating="taskStore.updatingTaskIds.has(task.id)"
                     @completed="taskStore.completeTask"
+                    @click="handleTaskClick(task.id)"
                 />
             </li>
         </TransitionGroup>

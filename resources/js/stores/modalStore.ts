@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import type { Ref } from 'vue';
 import { ref } from 'vue';
 
-export type Modal = { id: 'store-task' };
+export type Modal = { id: 'store-task' } | { id: 'show-task' };
 
 export const useModalStore = defineStore('modal', () => {
     const isOpen = ref(false);

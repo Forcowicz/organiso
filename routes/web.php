@@ -10,6 +10,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::controller(TaskController::class)->group(function () {
         Route::get('/tasks', 'index')->name('tasks.index');
+        Route::get('/tasks/{task}', 'show')->name('tasks.show');
+        Route::delete('/tasks/{task}', 'destroy')->name('tasks.delete');
         Route::post('/tasks', 'store')->name('tasks.store');
         Route::patch('/tasks/{task}', 'update')->name('tasks.update');
     })->middleware(['auth', 'verified']);

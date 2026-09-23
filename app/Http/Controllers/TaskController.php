@@ -64,7 +64,10 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        //
+        return response([
+            'status' => 'success',
+            'task' => $task->load('user')
+        ]);
     }
 
     /**
@@ -86,6 +89,8 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        //
+        $task->delete();
+
+        return redirect()->back();
     }
 }
