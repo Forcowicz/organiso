@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Form } from '@inertiajs/vue3';
+import { Form, router } from '@inertiajs/vue3';
 import { Calendar, Clock, Flame, Plus, Star } from '@lucide/vue';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';

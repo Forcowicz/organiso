@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import { ChevronRight, ClipboardClock, Grid2X2 } from '@lucide/vue';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import type { ITask, SortAlgorithm } from '@/components/Task';
 import Task from '@/components/Task/Task.vue';
 import Button from '@/components/ui/button/Button.vue';
@@ -36,6 +36,13 @@ const props = withDefaults(
 
 const taskStore = useTaskStore();
 taskStore.setTasks(props.tasks);
+
+watch(
+    () => props.tasks,
+    (newTasks: ITask[]) => {
+        taskStore.setTasks(newTasks);
+    },
+);
 
 const modalStore = useModalStore();
 
