@@ -47,14 +47,14 @@ function handleDelete() {
             </p>
 
             <TaskDetails
-                class="flex md:flex-row flex-col md:items-center gap-1 mt-2"
+                class="flex md:flex-row flex-col md:items-center gap-4 mt-2"
                 :due-date="taskStore.fetchedTask.due_date!"
                 :due-time="taskStore.fetchedTask.due_time!"
                 :is-important="taskStore.fetchedTask.is_important"
                 :is-urgent="taskStore.fetchedTask.is_urgent"
             />
 
-            <div class="flex items-center gap-1 mt-8">
+            <div class="flex items-center mt-8">
                 <Button
                     variant="destructive"
                     :disabled="isDeleting"

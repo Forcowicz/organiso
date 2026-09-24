@@ -37,6 +37,7 @@ const emits = defineEmits<{
             </p>
 
             <TaskDetails
+                v-if="taskData.is_urgent || taskData.is_important"
                 class="flex items-center gap-4"
                 :due-date="taskData.due_date!"
                 :due-time="taskData.due_time!"

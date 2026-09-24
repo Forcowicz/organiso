@@ -66,9 +66,11 @@ function handleSuccess() {
 
                 <TextArea
                     rows="2"
+                    :tabindex="2"
                     id="description"
                     name="description"
                     placeholder="Niektóre graty mogą być jeszcze potrzebne..."
+                    class="resize-none"
                 ></TextArea>
 
                 <!-- <InputError :message="errors.description" /> -->
@@ -91,6 +93,7 @@ function handleSuccess() {
                         <input
                             ref="dueDateInput"
                             v-model="dateInputValue"
+                            :tabindex="3"
                             name="due_date"
                             type="date"
                             class="bg-transparent p-0 border-0 outline-none focus:ring-0 text-slate-700 text-xs cursor-pointer"
@@ -107,6 +110,7 @@ function handleSuccess() {
                         <Clock class="size-3.5 text-slate-500 shrink-0" />
                         <input
                             :disabled="!dateInputValue"
+                            :tabindex="4"
                             name="due_time"
                             type="time"
                             class="bg-transparent p-0 border-0 outline-none focus:ring-0 text-slate-700 text-xs cursor-pointer disabled:cursor-not-allowed"
@@ -119,6 +123,7 @@ function handleSuccess() {
                     <button
                         type="button"
                         @click="toggleUrgent"
+                        :tabindex="5"
                         class="flex items-center gap-1.5 px-2.5 py-1.5 border rounded-lg font-medium text-xs transition-all cursor-pointer select-none"
                         :class="
                             isUrgent
@@ -145,6 +150,7 @@ function handleSuccess() {
                     <!-- Important Flag (Eisenhower Matrix) -->
                     <button
                         type="button"
+                        :tabindex="6"
                         @click="toggleImportant"
                         class="flex items-center gap-1.5 px-2.5 py-1.5 border rounded-lg font-medium text-xs transition-all cursor-pointer select-none"
                         :class="
@@ -174,9 +180,9 @@ function handleSuccess() {
                 <div class="mt-6">
                     <Button
                         type="submit"
+                        :tabindex="7"
                         size="sm"
                         :disabled="processing"
-                        class="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 shadow-xs px-3.5 py-1.5 rounded-lg font-medium text-white text-xs transition-colors cursor-pointer disabled:cursor-not-allowed"
                     >
                         <Plus class="size-3.5" />
                         <span>{{ processing ? 'Adding...' : 'Add task' }}</span>

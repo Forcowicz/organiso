@@ -42,10 +42,10 @@ initializeTheme();
 // This will listen for flash toast data from the server...
 initializeFlashToast();
 
-App.addListener('backButton', ({ canGoBack }) => {
-    if (!canGoBack) {
-        App.exitApp();
-    } else {
-        window.history.back();
-    }
-});
+// App.addListener('backButton', ({ canGoBack }) => {
+//     if (!canGoBack) {
+//         App.exitApp();
+//     } else {
+//         window.history.back();
+//     }
+// });
