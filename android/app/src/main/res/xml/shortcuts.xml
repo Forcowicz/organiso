@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <capability android:name="actions.intent.CREATE_TASK">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="eu.organiso.app"
+            android:targetClass="eu.organiso.app.CreateTaskHeadlessActivity">
+            <!-- Tytuł zadania -->
+            <parameter
+                android:name="task.name"
+                android:key="task_name" />
+            <!-- Opcjonalny opis zadania -->
+            <parameter
+                android:name="task.description"
+                android:key="task_description" />
+            <!-- Opcjonalny termin (np. "na jutro o 14:00") -->
+            <parameter
+                android:name="task.temporalSpan"
+                android:key="task_due" />
+        </intent>
+    </capability>
+</shortcuts>

@@ -1,4 +1,3 @@
-import { App } from '@capacitor/app';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { createPinia } from 'pinia';
 import { createApp, h } from 'vue';
@@ -7,6 +6,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
+import { initializeMobileApp } from './mobile';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const pinia = createPinia();
@@ -32,7 +32,7 @@ createInertiaApp({
             .mount(el);
     },
     progress: {
-        color: '#4B5563',
+        color: '#63278b',
     },
 });
 
@@ -42,10 +42,5 @@ initializeTheme();
 // This will listen for flash toast data from the server...
 initializeFlashToast();
 
-App.addListener('backButton', ({ canGoBack }) => {
-    if (!canGoBack) {
-        App.exitApp();
-    } else {
-        window.history.back();
-    }
-});
+// Mobile app initialization
+await initializeMobileApp();

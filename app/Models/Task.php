@@ -12,6 +12,8 @@ class Task extends Model
 {
     use HasUuids;
 
+    protected $guarded = [];
+
     public function eisenhowerMatrix(): Attribute
     {
         return Attribute::get(fn() => EisenhowerMatrix::fromBooleans(
