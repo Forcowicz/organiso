@@ -12,7 +12,6 @@
 	},
 	"plugins": {
 		"LocalNotifications": {
-			"smallIcon": "ic_notification",
 			"iconColor": "#63278b",
 			"presentationOptions": [
 				"badge",

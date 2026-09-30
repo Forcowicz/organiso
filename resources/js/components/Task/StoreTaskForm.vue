@@ -30,7 +30,7 @@ async function handleSuccess(page: any) {
     isUrgent.value = false;
     isImportant.value = false;
 
-    const { task } = page.props.flash;
+    const task = page.props?.flash?.task;
 
     if (!task || !task?.due_date) {
         return;

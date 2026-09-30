@@ -45,6 +45,7 @@ export const taskNotificationService = {
                 channelId: 'tasks-high',
                 schedule: {
                     at: dueDate,
+                    allowWhileIdle: true,
                 },
                 extra: {
                     taskId: task.id,
@@ -62,6 +63,7 @@ export const taskNotificationService = {
                 channelId: 'tasks-high',
                 schedule: {
                     at: oneHourBefore,
+                    allowWhileIdle: true,
                 },
                 extra: {
                     taskId: task.id,

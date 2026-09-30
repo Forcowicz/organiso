@@ -44,6 +44,8 @@ export function useLocalNotifications() {
             );
         }
 
+        await createChannel();
+
         const items = Array.isArray(data) ? data : [data];
         const notifications = items.map((item) => {
             let { id } = item;
