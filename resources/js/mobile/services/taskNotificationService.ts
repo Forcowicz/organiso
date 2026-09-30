@@ -5,6 +5,7 @@ import type {
 import type { ITask } from '@/components/Task';
 import { useDateTimeFormatter } from '@/composables/useDateTimeFormatter';
 import { useDeadlineFormatter } from '@/composables/useDeadlineFormatter';
+import type { LocalNotificationData } from '../modules/useLocalNotifications';
 import { useLocalNotifications } from '../modules/useLocalNotifications';
 
 export interface TaskNotificationData {
@@ -25,11 +26,9 @@ export const taskNotificationService = {
             task.due_date,
             task.due_time ?? undefined,
         ).value;
-
-        const notificationTime = new Date(dueDate.getTime() - 60 * 60 * 1000);
         const now = new Date();
 
-        if (notificationTime <= now) {
+        if (dueDate <= now) {
             return null;
         }
 
@@ -37,20 +36,43 @@ export const taskNotificationService = {
             task.due_date,
             task.due_time ?? undefined,
         );
+        const formattedDeadline = deadline?.value ?? task.due_date;
 
-        const notification = await localNotifications.schedule({
-            title: `Deadline approaching for "${task.name}"`,
-            body: `Deadline for this task is ${deadline?.value ?? task.due_date}`,
-            channelId: 'tasks-high',
-            schedule: {
-                at: notificationTime,
+        const notifications: LocalNotificationData[] = [
+            {
+                title: `Deadline for "${task.name}"`,
+                body: `Deadline for this task is now (${formattedDeadline})`,
+                channelId: 'tasks-high',
+                schedule: {
+                    at: dueDate,
+                },
+                extra: {
+                    taskId: task.id,
+                    type: 'at_deadline',
+                },
             },
-            extra: {
-                taskId: task.id,
-            },
-        });
+        ];
 
-        return notification!;
+        const oneHourBefore = new Date(dueDate.getTime() - 60 * 60 * 1000);
+
+        if (oneHourBefore > now) {
+            notifications.push({
+                title: `Deadline approaching for "${task.name}"`,
+                body: `Deadline for this task is ${formattedDeadline}`,
+                channelId: 'tasks-high',
+                schedule: {
+                    at: oneHourBefore,
+                },
+                extra: {
+                    taskId: task.id,
+                    type: 'one_hour_before',
+                },
+            });
+        }
+
+        const result = await localNotifications.schedule(notifications);
+
+        return result ?? null;
     },
 
     async cancel(taskId: string): Promise<void> {
@@ -61,15 +83,15 @@ export const taskNotificationService = {
             return;
         }
 
-        const targetNotification = pendingNotifications.find(
+        const targetNotifications = pendingNotifications.filter(
             (n) => n.extra?.taskId === taskId,
         );
 
-        if (!targetNotification) {
+        if (targetNotifications.length === 0) {
             return;
         }
 
-        await localNotifications.cancel(targetNotification.id);
+        await localNotifications.cancel(targetNotifications.map((n) => n.id));
     },
 
     async sync(tasks: ITask[]): Promise<void> {
@@ -83,11 +105,8 @@ export const taskNotificationService = {
                 t.due_date,
                 t.due_time ?? undefined,
             ).value;
-            const notificationTime = new Date(
-                dueDate.getTime() - 60 * 60 * 1000,
-            );
 
-            return notificationTime > now;
+            return dueDate > now;
         });
 
         const pendingNotifications: PendingLocalNotificationSchema[] | void =

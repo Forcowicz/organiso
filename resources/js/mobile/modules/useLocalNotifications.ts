@@ -30,7 +30,7 @@ export function useLocalNotifications() {
     }
 
     async function schedule(
-        data: LocalNotificationData,
+        data: LocalNotificationData | LocalNotificationData[],
     ): Promise<ScheduleResult | void> {
         if (!Capacitor.isNativePlatform()) {
             return;
@@ -44,16 +44,21 @@ export function useLocalNotifications() {
             );
         }
 
-        let { id } = data;
+        const items = Array.isArray(data) ? data : [data];
+        const notifications = items.map((item) => {
+            let { id } = item;
 
-        if (!id) {
-            const buffer = new Uint16Array(1);
-            crypto.getRandomValues(buffer);
-            id = buffer[0];
-        }
+            if (!id) {
+                const buffer = new Uint16Array(1);
+                crypto.getRandomValues(buffer);
+                id = buffer[0];
+            }
+
+            return { ...item, id };
+        });
 
         const notification = await LocalNotifications.schedule({
-            notifications: [{ ...data, id }],
+            notifications,
         });
 
         return notification;
