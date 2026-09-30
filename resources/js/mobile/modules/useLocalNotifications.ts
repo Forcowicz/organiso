@@ -10,6 +10,7 @@ import { MissingPermissionsError } from '../errors';
 export interface LocalNotificationData {
     title: string;
     body: string;
+    channelId?: string;
     extra?: object;
     id?: number;
     schedule?: Schedule;
@@ -94,5 +95,27 @@ export function useLocalNotifications() {
         return pending.notifications;
     }
 
-    return { ensurePermissions, schedule, cancel, cancelAll, getPending };
+    async function createChannel(): Promise<void> {
+        if (!Capacitor.isNativePlatform()) {
+            return;
+        }
+
+        await LocalNotifications.createChannel({
+            id: 'tasks-high',
+            name: 'Task Reminders',
+            description: 'Notifications for upcoming task deadlines',
+            importance: 5,
+            visibility: 1,
+            vibration: true,
+        });
+    }
+
+    return {
+        ensurePermissions,
+        createChannel,
+        schedule,
+        cancel,
+        cancelAll,
+        getPending,
+    };
 }

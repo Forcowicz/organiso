@@ -51,6 +51,7 @@ export async function initializeMobileApp() {
     // Initialize local notifications
     const localNotifications = useLocalNotifications();
     await localNotifications.ensurePermissions();
+    await localNotifications.createChannel();
 
     if (platform === 'android') {
     }

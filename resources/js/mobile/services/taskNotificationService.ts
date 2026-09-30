@@ -4,6 +4,7 @@ import type {
 } from '@capacitor/local-notifications';
 import type { ITask } from '@/components/Task';
 import { useDateTimeFormatter } from '@/composables/useDateTimeFormatter';
+import { useDeadlineFormatter } from '@/composables/useDeadlineFormatter';
 import { useLocalNotifications } from '../modules/useLocalNotifications';
 
 export interface TaskNotificationData {
@@ -20,16 +21,29 @@ export const taskNotificationService = {
             return null;
         }
 
-        const dateFormatter = useDateTimeFormatter(
+        const dueDate = useDateTimeFormatter(
             task.due_date,
-            task.due_time!,
+            task.due_time ?? undefined,
+        ).value;
+
+        const notificationTime = new Date(dueDate.getTime() - 60 * 60 * 1000);
+        const now = new Date();
+
+        if (notificationTime <= now) {
+            return null;
+        }
+
+        const deadline = useDeadlineFormatter(
+            task.due_date,
+            task.due_time ?? undefined,
         );
 
         const notification = await localNotifications.schedule({
-            title: task.name,
-            body: 'Test',
+            title: `Deadline approaching for "${task.name}"`,
+            body: `Deadline for this task is ${deadline?.value ?? task.due_date}`,
+            channelId: 'tasks-high',
             schedule: {
-                at: dateFormatter.value, // todo: move -1 h
+                at: notificationTime,
             },
             extra: {
                 taskId: task.id,
@@ -65,10 +79,15 @@ export const taskNotificationService = {
                 return false;
             }
 
-            return (
-                useDateTimeFormatter(t.due_date, t.due_time ?? undefined)
-                    .value > now
+            const dueDate = useDateTimeFormatter(
+                t.due_date,
+                t.due_time ?? undefined,
+            ).value;
+            const notificationTime = new Date(
+                dueDate.getTime() - 60 * 60 * 1000,
             );
+
+            return notificationTime > now;
         });
 
         const pendingNotifications: PendingLocalNotificationSchema[] | void =
