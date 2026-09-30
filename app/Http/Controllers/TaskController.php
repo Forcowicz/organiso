@@ -56,7 +56,10 @@ class TaskController extends Controller
         $task->user_id = $request->user()->id;
         $task->save();
 
-        return redirect()->back();
+        return redirect()->back()->with('flash', [
+            'message' => 'A task has been saved.',
+            'task' => $task
+        ]);
     }
 
     /**

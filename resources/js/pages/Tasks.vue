@@ -9,6 +9,7 @@ import DropdownMenu from '@/components/ui/dropdown-menu/DropdownMenu.vue';
 import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue';
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue';
 import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue';
+import { taskNotificationService } from '@/mobile/services/taskNotificationService';
 import taskRoutes from '@/routes/tasks';
 import { useModalStore } from '@/stores/modalStore';
 import { useTaskStore } from '@/stores/taskStore';
@@ -35,12 +36,15 @@ const props = withDefaults(
 );
 
 const taskStore = useTaskStore();
-taskStore.setTasks(props.tasks);
 
 watch(
     () => props.tasks,
-    (newTasks: ITask[]) => {
+    async (newTasks: ITask[]) => {
         taskStore.setTasks(newTasks);
+        await taskNotificationService.sync(newTasks);
+    },
+    {
+        immediate: true,
     },
 );
 

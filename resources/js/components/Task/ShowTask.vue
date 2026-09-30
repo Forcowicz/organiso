@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { taskNotificationService } from '@/mobile/services/taskNotificationService.js';
 import tasks from '@/routes/tasks/index.js';
 import { useModalStore } from '@/stores/modalStore.js';
 import { useTaskStore } from '@/stores/taskStore';
@@ -22,10 +23,12 @@ function handleDelete() {
     taskStore.updatingTaskIds.add(taskId);
 
     router.delete(tasks.delete(taskId), {
-        onSuccess() {
+        async onSuccess() {
             isDeleting.value = false;
 
             modalStore.close();
+
+            await taskNotificationService.cancel(taskId);
 
             setTimeout(() => {
                 taskStore.removeTask(taskId);

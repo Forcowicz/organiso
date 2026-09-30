@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { Form, router } from '@inertiajs/vue3';
+import { Form } from '@inertiajs/vue3';
 import { Calendar, Clock, Flame, Plus, Star } from '@lucide/vue';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/input/Input.vue';
 import Label from '@/components/ui/label/Label.vue';
 import TextArea from '@/components/ui/textarea/TextArea.vue';
+import { taskNotificationService } from '@/mobile/services/taskNotificationService';
 import { store } from '@/routes/tasks/index.js';
 import { useModalStore } from '@/stores/modalStore';
 
@@ -23,11 +24,19 @@ function toggleImportant() {
     isImportant.value = !isImportant.value;
 }
 
-function handleSuccess() {
+async function handleSuccess(page: any) {
     modalStore.close();
     dateInputValue.value = '';
     isUrgent.value = false;
     isImportant.value = false;
+
+    const { task } = page.props.flash;
+
+    if (!task || !task?.due_date) {
+        return;
+    }
+
+    await taskNotificationService.schedule({ task });
 }
 </script>
 

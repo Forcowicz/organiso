@@ -12,6 +12,13 @@ const config: CapacitorConfig = {
     android: {
         allowMixedContent: true,
     },
+    plugins: {
+        LocalNotifications: {
+            smallIcon: 'ic_notification',
+            iconColor: '#63278b',
+            presentationOptions: ['badge', 'sound', 'banner', 'list'],
+        },
+    },
 };
 
 export default config;

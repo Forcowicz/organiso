@@ -1,0 +1,98 @@
+import { Capacitor } from '@capacitor/core';
+import type {
+    PendingLocalNotificationSchema,
+    Schedule,
+    ScheduleResult,
+} from '@capacitor/local-notifications';
+import { LocalNotifications } from '@capacitor/local-notifications';
+import { MissingPermissionsError } from '../errors';
+
+export interface LocalNotificationData {
+    title: string;
+    body: string;
+    extra?: object;
+    id?: number;
+    schedule?: Schedule;
+}
+
+export function useLocalNotifications() {
+    async function ensurePermissions(): Promise<boolean> {
+        let hasPermissions = await LocalNotifications.checkPermissions();
+
+        if (hasPermissions.display === 'granted') {
+            return true;
+        }
+
+        hasPermissions = await LocalNotifications.requestPermissions();
+
+        return hasPermissions.display === 'granted';
+    }
+
+    async function schedule(
+        data: LocalNotificationData,
+    ): Promise<ScheduleResult | void> {
+        if (!Capacitor.isNativePlatform()) {
+            return;
+        }
+
+        const hasPermissions = await ensurePermissions();
+
+        if (!hasPermissions) {
+            throw new MissingPermissionsError(
+                'Missing permissions for displaying local notifications.',
+            );
+        }
+
+        let { id } = data;
+
+        if (!id) {
+            const buffer = new Uint16Array(1);
+            crypto.getRandomValues(buffer);
+            id = buffer[0];
+        }
+
+        const notification = await LocalNotifications.schedule({
+            notifications: [{ ...data, id }],
+        });
+
+        return notification;
+    }
+
+    async function cancel(id: number | number[]): Promise<void> {
+        if (!Capacitor.isNativePlatform()) {
+            return;
+        }
+
+        if (Array.isArray(id)) {
+            await LocalNotifications.cancel({
+                notifications: id.map((i) => ({ id: i })),
+            });
+        } else {
+            await LocalNotifications.cancel({
+                notifications: [{ id }],
+            });
+        }
+    }
+
+    async function cancelAll(): Promise<void> {
+        if (!Capacitor.isNativePlatform()) {
+            return;
+        }
+
+        await LocalNotifications.cancelAll();
+    }
+
+    async function getPending(): Promise<
+        PendingLocalNotificationSchema[] | void
+    > {
+        if (!Capacitor.isNativePlatform()) {
+            return;
+        }
+
+        const pending = await LocalNotifications.getPending();
+
+        return pending.notifications;
+    }
+
+    return { ensurePermissions, schedule, cancel, cancelAll, getPending };
+}

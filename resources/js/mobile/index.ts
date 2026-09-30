@@ -3,7 +3,8 @@ import { Capacitor } from '@capacitor/core';
 import { usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { store } from '@/routes/api/tokens';
-import { usePreferences } from './modules/preferences';
+import { useLocalNotifications } from './modules/useLocalNotifications';
+import { usePreferences } from './modules/usePreferences';
 
 async function getApiToken(): Promise<string> {
     const res = await axios.post(store().url, {
@@ -46,6 +47,10 @@ export async function initializeMobileApp() {
             await preferences.setApiToken(token);
         }
     }
+
+    // Initialize local notifications
+    const localNotifications = useLocalNotifications();
+    await localNotifications.ensurePermissions();
 
     if (platform === 'android') {
     }
