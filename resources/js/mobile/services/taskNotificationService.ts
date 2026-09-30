@@ -22,6 +22,8 @@ export const taskNotificationService = {
             return null;
         }
 
+        await this.cancel(task.id);
+
         const dueDate = useDateTimeFormatter(
             task.due_date,
             task.due_time ?? undefined,
