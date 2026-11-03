@@ -1,98 +1,100 @@
 services:
-  web:
-    build:
-      context: .
-      dockerfile: ./docker/nginx/Dockerfile
-      args:
-        APP_KEY: ${APP_KEY}
-        WWWUSER: '${WWWUSER:-1000}'
-    restart: unless-stopped # Automatically restart unless the service is explicitly stopped
-    volumes:
-      - organiso-storage-production:/var/www/storage:ro
-      # Shared volume populated by this container's entrypoint on startup.
-      # php-fpm mounts it read-only to access public/build/.vite/manifest.json
-      # which is required by the @vite() blade directive to generate asset URLs.
-      - organiso-public-build:/var/www/public/build
-    networks:
-      - organiso-production
-    ports:
-      # Map port 80 inside the container to the port specified by 'NGINX_PORT' on the host machine.
-      # -----------------------------------------------------------
-      # This allows external access to the Nginx web server running inside the container.
-      # For example, if 'NGINX_PORT' is set to '8080', accessing 'http://localhost:8080' will reach the application.
-      # -----------------------------------------------------------
-      - "${NGINX_PORT:-80}:80"
-    depends_on:
-      php-fpm:
-        condition: service_healthy
+    web:
+        build:
+            context: .
+            dockerfile: ./docker/nginx/Dockerfile
+            args:
+                APP_KEY: ${APP_KEY}
+                WWWUSER: '${WWWUSER:-1000}'
+        restart: unless-stopped # Automatically restart unless the service is explicitly stopped
+        volumes:
+            - organiso-storage-production:/var/www/storage:ro
+            # Shared volume populated by this container's entrypoint on startup.
+            # php-fpm mounts it read-only to access public/build/.vite/manifest.json
+            # which is required by the @vite() blade directive to generate asset URLs.
+            - organiso-public-build:/var/www/public/build
+        networks:
+            - organiso-production
+            - proxy-net
+        ports:
+            # Map port 80 inside the container to the port specified by 'NGINX_PORT' on the host machine.
+            # -----------------------------------------------------------
+            # This allows external access to the Nginx web server running inside the container.
+            # For example, if 'NGINX_PORT' is set to '8080', accessing 'http://localhost:8080' will reach the application.
+            # -----------------------------------------------------------
+            - '${NGINX_PORT:-80}:80'
+        depends_on:
+            php-fpm:
+                condition: service_healthy
 
-  php-fpm:
-    build:
-      context: .
-      dockerfile: ./docker/php-fpm/Dockerfile
-      target: production
-    restart: unless-stopped
-    volumes:
-      - organiso-storage-production:/var/www/storage
-      # Read-only access to the Vite manifest so @vite() can generate hashed asset URLs.
-      # Populated by the nginx container's entrypoint before nginx starts.
-      - organiso-public-build:/var/www/public/build:ro
-    env_file:
-      - .env
-    networks:
-      - organiso-production
-    healthcheck:
-      test: ["CMD-SHELL", "php-fpm-healthcheck || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    depends_on:
-      postgres:
-        condition: service_healthy
+    php-fpm:
+        build:
+            context: .
+            dockerfile: ./docker/php-fpm/Dockerfile
+            target: production
+        restart: unless-stopped
+        volumes:
+            - organiso-storage-production:/var/www/storage
+            # Read-only access to the Vite manifest so @vite() can generate hashed asset URLs.
+            # Populated by the nginx container's entrypoint before nginx starts.
+            - organiso-public-build:/var/www/public/build:ro
+        env_file:
+            - .env
+        networks:
+            - organiso-production
+        healthcheck:
+            test: ['CMD-SHELL', 'php-fpm-healthcheck || exit 1']
+            interval: 10s
+            timeout: 5s
+            retries: 3
+        depends_on:
+            postgres:
+                condition: service_healthy
 
-  postgres:
-    image: postgres:18
-    restart: unless-stopped
-    user: postgres
-    ports:
-      - "${DB_PORT}:5432"
-    environment:
-      - POSTGRES_DB=${DB_DATABASE}
-      - POSTGRES_USER=${DB_USERNAME}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-    volumes:
-      - postgres-data-production:/var/lib/postgresql
-    networks:
-      organiso-production:
-        aliases:
-          - pgsql
-    healthcheck:
-      test: ["CMD", "pg_isready"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    postgres:
+        image: postgres:18
+        restart: unless-stopped
+        user: postgres
+        ports:
+            - '${DB_PORT}:5432'
+        environment:
+            - POSTGRES_DB=${DB_DATABASE}
+            - POSTGRES_USER=${DB_USERNAME}
+            - POSTGRES_PASSWORD=${DB_PASSWORD}
+        volumes:
+            - postgres-data-production:/var/lib/postgresql
+        networks:
+            organiso-production:
+                aliases:
+                    - pgsql
+        healthcheck:
+            test: ['CMD', 'pg_isready']
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
-  redis:
-    image: redis:alpine
-    restart: unless-stopped
-    networks:
-      - organiso-production
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+    redis:
+        image: redis:alpine
+        restart: unless-stopped
+        networks:
+            - organiso-production
+        healthcheck:
+            test: ['CMD', 'redis-cli', 'ping']
+            interval: 10s
+            timeout: 5s
+            retries: 3
 
 networks:
-  # Attach the service to the 'organiso-production' network.
-  # -----------------------------------------------------------
-  # This custom network allows all services within it to communicate using their service names as hostnames.
-  # For example, 'php-fpm' can connect to 'postgres' by using 'postgres' as the hostname.
-  # -----------------------------------------------------------
-  organiso-production:
-
+    # Attach the service to the 'organiso-production' network.
+    # -----------------------------------------------------------
+    # This custom network allows all services within it to communicate using their service names as hostnames.
+    # For example, 'php-fpm' can connect to 'postgres' by using 'postgres' as the hostname.
+    # -----------------------------------------------------------
+    organiso-production:
+    proxy-net:
+        external: true
 volumes:
-  postgres-data-production:
-  organiso-storage-production:
-  # Vite build output shared between nginx (serves assets) and php-fpm (reads manifest).
-  organiso-public-build:
+    postgres-data-production:
+    organiso-storage-production:
+    # Vite build output shared between nginx (serves assets) and php-fpm (reads manifest).
+    organiso-public-build:
